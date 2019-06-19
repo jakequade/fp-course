@@ -17,6 +17,7 @@ import qualified Control.Applicative as A
 import qualified Control.Monad as M
 import Course.Core
 import Course.Optional
+import Data.List (last, tail)
 import qualified System.Environment as E
 import qualified Prelude as P
 import qualified Numeric as N
@@ -153,6 +154,14 @@ filter p (x :. y)
   | p x       = (x :. (filter p y))
   | otherwise = filter p y
 
+serialize :: [a] -> List (Optional a)
+serialize []       = Nil
+serialize (x : xs) = Full x :. serialize xs
+
+deserialize :: List (Optional a) -> [a]
+deserialize (Empty :. xs)  = deserialize xs
+deserialize Nil            = []
+deserialize (Full x :. xs) = x : deserialize xs
 
 -- | Append two lists to a new list.
 --
@@ -241,10 +250,13 @@ flattenAgain =
 --
 -- >>> seqOptional (Empty :. map Full infinity)
 -- Empty
-seqOptional ::
+seqOptional :: (Eq a) => 
   List (Optional a)
   -> Optional (List a)
-seqOptional (_ :. _) = Empty
+seqOptional x
+  | elem Empty x   = Empty
+  | otherwise      = Full $ map d x
+  where d (Full y) = y
 
 -- | Find the first element in the list matching the predicate.
 --
@@ -266,8 +278,8 @@ find ::
   (a -> Bool)
   -> List a
   -> Optional a
-find =
-  error "todo: Course.List#find"
+find _ Nil       = Empty
+find p (x :. xs) = bool (find p xs) (Full x) $ p x
 
 -- | Determine if the length of the given list is greater than 4.
 --
@@ -285,8 +297,7 @@ find =
 lengthGT4 ::
   List a
   -> Bool
-lengthGT4 =
-  error "todo: Course.List#lengthGT4"
+lengthGT4 x = length (take 5 x) == 5
 
 -- | Reverse a list.
 --
@@ -302,8 +313,10 @@ lengthGT4 =
 reverse ::
   List a
   -> List a
-reverse =
-  error "todo: Course.List#reverse"
+reverse = undefined
+
+foldTest :: List a -> List a
+foldTest x = foldRight (\x y -> (y :. x)) Nil x
 
 -- | Produce an infinite `List` that seeds with the given value at its head,
 -- then runs the given function for subsequent elements
