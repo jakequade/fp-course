@@ -116,8 +116,7 @@ void ::
   Functor f =>
   f a
   -> f ()
-void (x :. xs) = () :. (void xs)
-void x = x
+void = undefined
 
 -----------------------
 -- SUPPORT LIBRARIES --

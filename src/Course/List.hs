@@ -17,6 +17,7 @@ import qualified Control.Applicative as A
 import qualified Control.Monad as M
 import Course.Core
 import Course.Optional
+import Data.List (last, tail)
 import qualified System.Environment as E
 import qualified Prelude as P
 import qualified Numeric as N
@@ -153,6 +154,14 @@ filter p (x :. y)
   | p x       = (x :. (filter p y))
   | otherwise = filter p y
 
+serialize :: [a] -> List (Optional a)
+serialize []       = Nil
+serialize (x : xs) = Full x :. serialize xs
+
+deserialize :: List (Optional a) -> [a]
+deserialize (Empty :. xs)  = deserialize xs
+deserialize Nil            = []
+deserialize (Full x :. xs) = x : deserialize xs
 
 -- | Append two lists to a new list.
 --
@@ -270,9 +279,7 @@ find ::
   -> List a
   -> Optional a
 find _ Nil = Empty
-find p (x :. xs) = case (p x) of
-  True -> Full x
-  False -> find p xs
+find p (x :. xs) = bool (find p xs) (Full x) (p x)
 
 -- | Determine if the length of the given list is greater than 4.
 --
@@ -290,7 +297,7 @@ find p (x :. xs) = case (p x) of
 lengthGT4 ::
   List a
   -> Bool
-lengthGT4 x = length (take 5 x) > 4
+lengthGT4 x = length (take 5 x) == 5
 
 -- | Reverse a list.
 --
