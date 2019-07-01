@@ -47,14 +47,13 @@ instance Applicative ExactlyOne where
   pure ::
     a
     -> ExactlyOne a
-  pure =
-    error "todo: Course.Applicative pure#instance ExactlyOne"
+  pure = ExactlyOne
+
   (<*>) ::
     ExactlyOne (a -> b)
     -> ExactlyOne a
     -> ExactlyOne b
-  (<*>) =
-    error "todo: Course.Applicative (<*>)#instance ExactlyOne"
+  (<*>) (ExactlyOne f) (ExactlyOne x) = ExactlyOne (f x)
 
 -- | Insert into a List.
 --
@@ -66,14 +65,13 @@ instance Applicative List where
   pure ::
     a
     -> List a
-  pure =
-    error "todo: Course.Applicative pure#instance List"
+  pure x = x :. Nil
   (<*>) ::
     List (a -> b)
     -> List a
     -> List b
-  (<*>) =
-    error "todo: Course.Apply (<*>)#instance List"
+  (<*>) Nil       _ = Nil
+  (<*>) (f :. fs) x = (map f x) ++ ((<*>) fs x)
 
 -- | Insert into an Optional.
 --
@@ -91,14 +89,14 @@ instance Applicative Optional where
   pure ::
     a
     -> Optional a
-  pure =
-    error "todo: Course.Applicative pure#instance Optional"
+  pure x = Full x
   (<*>) ::
     Optional (a -> b)
     -> Optional a
     -> Optional b
-  (<*>) =
-    error "todo: Course.Apply (<*>)#instance Optional"
+  (<*>) Empty    _        = Empty
+  (<*>) _        Empty    = Empty
+  (<*>) (Full f) (Full x) = Full (f x)
 
 -- | Insert into a constant function.
 --
@@ -157,8 +155,7 @@ lift2 ::
   -> f a
   -> f b
   -> f c
-lift2 =
-  error "todo: Course.Applicative#lift2"
+lift2 = undefined
 
 -- | Apply a ternary function in the environment.
 -- /can be written using `lift2` and `(<*>)`./
@@ -277,8 +274,7 @@ lift1 =
   f a
   -> f b
   -> f b
-(*>) =
-  error "todo: Course.Applicative#(*>)"
+(*>) = error "TODO: Up tO HERE"
 
 -- | Apply, discarding the value of the second argument.
 -- Pronounced, left apply.
